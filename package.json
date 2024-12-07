@@ -1,6 +1,6 @@
 {
   "name": "call-kit",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "A Flutter plugin to show incoming call in your Flutter app(Custom for Android/Callkit for iOS)",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -39,7 +39,7 @@
     "eslint": "eslint . --ext ts",
     "prettier": "prettier \"**/*.{css,html,ts,js,java}\" --plugin=prettier-plugin-java",
     "swiftlint": "node-swiftlint",
-    "docgen": "docgen --api FlutterCallkitIncomingPluginPlugin --output-readme README.md --output-json dist/docs.json",
+    "docgen": "docgen --api FlutterCallkitIncomingPlugin --output-readme README.md --output-json dist/docs.json",
     "build": "npm run clean && npm run docgen && tsc && rollup -c rollup.config.mjs",
     "clean": "rimraf ./dist",
     "watch": "tsc --watch",

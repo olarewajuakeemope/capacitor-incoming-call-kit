@@ -13,24 +13,24 @@ npx cap sync
 
 <docgen-index>
 
-* [`echo(...)`](#echo)
+* [`onMethod(...)`](#onmethod)
 
 </docgen-index>
 
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
 
-### echo(...)
+### onMethod(...)
 
 ```typescript
-echo(options: { value: string; }) => Promise<{ value: string; }>
+onMethod(options: { methodName: string; options?: string; }) => Promise<unknown>
 ```
 
-| Param         | Type                            |
-| ------------- | ------------------------------- |
-| **`options`** | <code>{ value: string; }</code> |
+| Param         | Type                                                   |
+| ------------- | ------------------------------------------------------ |
+| **`options`** | <code>{ methodName: string; options?: string; }</code> |
 
-**Returns:** <code>Promise&lt;{ value: string; }&gt;</code>
+**Returns:** <code>Promise&lt;unknown&gt;</code>
 
 --------------------
 

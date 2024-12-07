@@ -7,22 +7,22 @@ let package = Package(
     products: [
         .library(
             name: "CallKit",
-            targets: ["FlutterCallkitIncomingPluginPlugin"])
+            targets: ["FlutterCallkitIncomingPlugin"])
     ],
     dependencies: [
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", branch: "main")
     ],
     targets: [
         .target(
-            name: "FlutterCallkitIncomingPluginPlugin",
+            name: "FlutterCallkitIncomingPlugin",
             dependencies: [
                 .product(name: "Capacitor", package: "capacitor-swift-pm"),
                 .product(name: "Cordova", package: "capacitor-swift-pm")
             ],
-            path: "ios/Sources/FlutterCallkitIncomingPluginPlugin"),
+            path: "ios/Sources/FlutterCallkitIncomingPlugin"),
         .testTarget(
-            name: "FlutterCallkitIncomingPluginPluginTests",
-            dependencies: ["FlutterCallkitIncomingPluginPlugin"],
-            path: "ios/Tests/FlutterCallkitIncomingPluginPluginTests")
+            name: "FlutterCallkitIncomingPluginTests",
+            dependencies: ["FlutterCallkitIncomingPlugin"],
+            path: "ios/Tests/FlutterCallkitIncomingPluginTests")
     ]
 )
