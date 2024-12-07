@@ -1,4 +1,4 @@
-# call-kit
+# capacitor-incoming-call-kit
 
 A Capacitor plugin to show incoming call in your Capacitor app(Custom for Android/Callkit for iOS)
 
@@ -7,7 +7,7 @@ This plugin is a modification of the Flutter plugin: flutter_callkit_incoming to
 ## Install
 
 ```bash
-npm install call-kit
+npm install capacitor-incoming-call-kit
 npx cap sync
 ```
 
