@@ -1,7 +1,7 @@
 {
   "name": "call-kit",
   "version": "0.0.3",
-  "description": "A Flutter plugin to show incoming call in your Flutter app(Custom for Android/Callkit for iOS)",
+  "description": "A Capacitor plugin to show incoming call in your Capacitor app(Custom for Android/Callkit for iOS)",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
@@ -15,14 +15,14 @@
     "Package.swift",
     "CallKit.podspec"
   ],
-  "author": "hiennguyen92",
+  "author": "olarewajuakeemope",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hiennguyen92/flutter_callkit_incoming.git"
+    "url": "git+https://github.com/olarewajuakeemope/capacitor-incoming-call-kit.git"
   },
   "bugs": {
-    "url": "https://github.com/hiennguyen92/flutter_callkit_incoming/issues"
+    "url": "https://github.com/olarewajuakeemope/capacitor-incoming-call-kit/issues"
   },
   "keywords": [
     "capacitor",
