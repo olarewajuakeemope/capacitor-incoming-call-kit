@@ -19,10 +19,6 @@ let package = Package(
                 .product(name: "Capacitor", package: "capacitor-swift-pm"),
                 .product(name: "Cordova", package: "capacitor-swift-pm")
             ],
-            path: "ios/Sources/FlutterCallkitIncomingPlugin"),
-        .testTarget(
-            name: "FlutterCallkitIncomingPluginTests",
-            dependencies: ["FlutterCallkitIncomingPlugin"],
-            path: "ios/Tests/FlutterCallkitIncomingPluginTests")
+            path: "ios/Classes/SwiftFlutterCallkitIncomingPlugin")
     ]
 )
