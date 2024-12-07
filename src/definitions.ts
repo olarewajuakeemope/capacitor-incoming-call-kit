@@ -156,7 +156,7 @@ export type Responses = void | { calls: CallKitParams[] }
 export interface FlutterCallkitIncomingPlugin {
   onMethod(options: {
     methodName: MethodNames
-    options?: string
+    options: string
   }): Promise<Responses>
   addListener: (even: Events, cb: (data: any) => void) => Promise<PluginListenerHandle>
 }
