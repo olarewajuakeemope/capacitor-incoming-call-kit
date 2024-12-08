@@ -144,6 +144,8 @@ export interface CallKitParams {
   textDecline?: string
   textMissedCall?: string
   textCallback?: string
+  rationaleMessagePermission?: string
+  postNotificationMessageRequired?: string
   missedCallNotification?: NotificationParams
   extra?: {[key:string]: any}
   headers?: {[key:string]: any}

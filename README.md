@@ -27,12 +27,12 @@ npx cap sync
 ### onMethod(...)
 
 ```typescript
-onMethod(options: { methodName: MethodNames; options: string; }) => Promise<Responses>
+onMethod(options: { options: string; methodName: MethodNames; parsedOptions: CallKitParams; }) => Promise<Responses>
 ```
 
-| Param         | Type                                                                                  |
-| ------------- | ------------------------------------------------------------------------------------- |
-| **`options`** | <code>{ methodName: <a href="#methodnames">MethodNames</a>; options: string; }</code> |
+| Param         | Type                                                                                                                                             |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`options`** | <code>{ options: string; methodName: <a href="#methodnames">MethodNames</a>; parsedOptions: <a href="#callkitparams">CallKitParams</a>; }</code> |
 
 **Returns:** <code>Promise&lt;<a href="#responses">Responses</a>&gt;</code>
 

@@ -72,7 +72,7 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
         super.init()
     }
     
-    public func onMethod(_ pluginCall: CAPPluginCall) {
+    @objc public func onMethod(_ pluginCall: CAPPluginCall) {
         let name = pluginCall.getString("methodName") ?? ""
         let options = pluginCall.getObject("parsedOptions")
         switch name {
@@ -161,7 +161,7 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
                     self.connectedCall(self.data!)
                 }
             }
-            call.resolve()
+            pluginCall.resolve()
             break
         case "activeCalls":
             pluginCall.resolve(["calls": self.callManager.activeCalls()])
