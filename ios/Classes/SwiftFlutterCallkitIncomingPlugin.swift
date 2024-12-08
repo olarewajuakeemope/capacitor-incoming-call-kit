@@ -5,7 +5,7 @@ import AVFoundation
 
 @available(iOS 10.0, *)
 @objc(SwiftFlutterCallkitIncomingPlugin)
-public class SwiftFlutterCallkitIncomingPlugin: NSObject, CAPPlugin, CAPBridgedPlugin, CXProviderDelegate {
+public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXProviderDelegate {
     public let identifier = "SwiftFlutterCallkitIncomingPlugin"
     public let jsName = "FlutterCallkitIncoming"
     public let pluginMethods: [CAPPluginMethod] = [
@@ -43,18 +43,18 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, CAPPlugin, CAPBridgedP
     private let devicePushTokenVoIP = "DevicePushTokenVoIP"
 
     
-    private func sendEvent(_ event: String, _ body: [String : Any?]?) {
+    private func sendEvent(_ event: String, _ body: [String : Any]?) {
         if silenceEvents {
             print(event, " silenced")
             return
         } else {
-            self.notifyListeners(event, event)
+            self.notifyListeners(event, data: body ?? [:])
         }
         
     }
     
-    @objc public func sendEventCustom(_ event: String, body: NSDictionary?) {
-        self.notifyListeners(event, event)
+    @objc public func sendEventCustom(_ event: String, body: [String : Any]?) {
+        self.notifyListeners(event, data: body ?? [:])
     }
     
     public static func sharePluginWithRegister(with pluginInstance: SwiftFlutterCallkitIncomingPlugin) {
@@ -64,102 +64,99 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, CAPPlugin, CAPBridgedP
     }
     
     override public func load() {
-        sharePluginWithRegister(with: self)
+        SwiftFlutterCallkitIncomingPlugin.sharePluginWithRegister(with: self)
     }
     
-    public init() {
+    public override init() {
         callManager = CallManager()
+        super.init()
     }
     
-    public func onMethod(_ call: CAPPluginCall) {
-        val parser: Parser = Parser.default()
-        let name = call.getString("methodName") ?? ""
-        let ojsString = call.getString("options") ?? ""
-        let options = try JSONDecoder().decode(String.self, from: ojsString)
+    public func onMethod(_ pluginCall: CAPPluginCall) {
+        let name = pluginCall.getString("methodName") ?? ""
+        let options = pluginCall.getObject("parsedOptions")
         switch name {
         case "showCallkitIncoming":
-            guard let args = options else {
-                call.resolve()
+            guard let getArgs = options else {
+                pluginCall.resolve()
                 return
             }
-            if let getArgs = args as? [String: Any] {
-                self.data = Data(args: getArgs)
-                showCallkitIncoming(self.data!, fromPushKit: false)
-            }
-            call.resolve()
+            self.data = Data(args: getArgs)
+            showCallkitIncoming(self.data!, fromPushKit: false)
+            pluginCall.resolve()
             break
         case "showMissCallNotification":
-            call.resolve()
+            pluginCall.resolve()
             break
         case "startCall":
             guard let args = options else {
-                call.resolve()
+                pluginCall.resolve()
                 return
             }
-            if let getArgs = args as? [String: Any] {
+            if let getArgs = options {
                 self.data = Data(args: getArgs)
                 self.startCall(self.data!, fromPushKit: false)
             }
-            call.resolve()
+            pluginCall.resolve()
             break
         case "endCall":
             guard let args = options else {
-                call.resolve()
+                pluginCall.resolve()
                 return
             }
             if(self.isFromPushKit){
                 self.endCall(self.data!)
             }else{
-                if let getArgs = args as? [String: Any] {
+                if let getArgs = options {
                     self.data = Data(args: getArgs)
                     self.endCall(self.data!)
                 }
             }
-            call.resolve()
+            pluginCall.resolve()
             break
         case "muteCall":
-            guard let args = options as? [String: Any] ,
+            guard let args = options,
                   let callId = args["id"] as? String,
                   let isMuted = args["isMuted"] as? Bool else {
-                call.resolve()
+                pluginCall.resolve()
                 return
             }
             
             self.muteCall(callId, isMuted: isMuted)
-            call.resolve()
+            pluginCall.resolve()
             break
         case "isMuted":
-            guard let args = options as? [String: Any] ,
+            guard let args = options,
                   let callId = args["id"] as? String else{
-                call.resolve(false)
+                pluginCall.resolve(["isMuted": false])
                 return
             }
             guard let callUUID = UUID(uuidString: callId),
                   let call = self.callManager.callWithUUID(uuid: callUUID) else {
-                call.resolve(false)
+                pluginCall.resolve(["isMuted": false])
                 return
             }
-            call.resolve(call.isMuted)
+            pluginCall.resolve(["isMuted": call.isMuted])
             break
         case "holdCall":
             guard let args = options as? [String: Any] ,
                   let callId = args["id"] as? String,
                   let onHold = args["isOnHold"] as? Bool else {
-                call.resolve()
+                pluginCall.resolve()
                 return
             }
             self.holdCall(callId, onHold: onHold)
-            call.resolve()
+            pluginCall.resolve()
             break
         case "callConnected":
             guard let args = options else {
-                call.resolve()
+                pluginCall.resolve()
                 return
             }
             if(self.isFromPushKit){
                 self.connectedCall(self.data!)
             }else{
-                if let getArgs = args as? [String: Any] {
+                if let getArgs = options {
                     self.data = Data(args: getArgs)
                     self.connectedCall(self.data!)
                 }
@@ -167,41 +164,41 @@ public class SwiftFlutterCallkitIncomingPlugin: NSObject, CAPPlugin, CAPBridgedP
             call.resolve()
             break
         case "activeCalls":
-            call.resolve(["calls": self.callManager.activeCalls()])
+            pluginCall.resolve(["calls": self.callManager.activeCalls()])
             break;
         case "endAllCalls":
             self.callManager.endCallAlls()
-            call.resolve()
+            pluginCall.resolve()
             break
         case "getDevicePushTokenVoIP":
-            call.resolve(self.getDevicePushTokenVoIP())
+            pluginCall.resolve(["devicePushTokenVoIP": self.getDevicePushTokenVoIP()])
             break;
         case "silenceEvents":
             guard let silence = options as? Bool else {
-                call.resolve()
+                pluginCall.resolve()
                 return
             }
             
             self.silenceEvents = silence
-            call.resolve()
+            pluginCall.resolve()
             break;
         case "requestNotificationPermission": 
-            call.resolve()
+            pluginCall.resolve()
             break
          case "requestFullIntentPermission": 
-            call.resolve()
+            pluginCall.resolve()
             break
         case "hideCallkitIncoming":
-            call.resolve()
+            pluginCall.resolve()
             break
         case "endNativeSubsystemOnly":
-            call.resolve()
+            pluginCall.resolve()
             break
         case "setAudioRoute":
-            call.resolve()
+            pluginCall.resolve()
             break
         default:
-            call.resolve(FlutterMethodNotImplemented)
+            pluginCall.resolve()
         }
     }
     

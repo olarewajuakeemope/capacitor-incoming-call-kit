@@ -8,6 +8,8 @@ export class FlutterCallkitIncomingWeb extends WebPlugin implements FlutterCallk
   async onMethod(_options: {
     methodName: MethodNames
     options: string
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    parsedOptions: {}
   }): Promise<Responses> {
     throw new Error('Web platform is not supported.')
   }
