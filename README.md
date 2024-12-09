@@ -132,7 +132,7 @@ onMethod(options: { options: string; methodName: MethodNames; parsedOptions: Cal
 
 #### Responses
 
-<code>void | { calls: CallKitParams[] }</code>
+<code>void | { isMuted: boolean } | { calls: CallKitParams[] } | { devicePushTokenVoIP: string }</code>
 
 
 #### MethodNames

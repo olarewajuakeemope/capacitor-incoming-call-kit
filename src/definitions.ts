@@ -153,7 +153,7 @@ export interface CallKitParams {
   ios?: IOSParams,
 }
 
-export type Responses = void | { calls: CallKitParams[] }
+export type Responses = void | { isMuted: boolean } | { calls: CallKitParams[] } | { devicePushTokenVoIP: string }
 
 export interface FlutterCallkitIncomingPlugin {
   onMethod(options: {
