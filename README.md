@@ -44,25 +44,27 @@ onMethod(options: { options: string; methodName: MethodNames; parsedOptions: Cal
 
 #### CallKitParams
 
-| Prop                         | Type                                                              |
-| ---------------------------- | ----------------------------------------------------------------- |
-| **`id`**                     | <code>string</code>                                               |
-| **`nameCaller`**             | <code>string</code>                                               |
-| **`appName`**                | <code>string</code>                                               |
-| **`avatar`**                 | <code>string</code>                                               |
-| **`handle`**                 | <code>string</code>                                               |
-| **`type`**                   | <code>number</code>                                               |
-| **`normalHandle`**           | <code>number</code>                                               |
-| **`duration`**               | <code>number</code>                                               |
-| **`textAccept`**             | <code>string</code>                                               |
-| **`textDecline`**            | <code>string</code>                                               |
-| **`textMissedCall`**         | <code>string</code>                                               |
-| **`textCallback`**           | <code>string</code>                                               |
-| **`missedCallNotification`** | <code><a href="#notificationparams">NotificationParams</a></code> |
-| **`extra`**                  | <code>{ [key: string]: any; }</code>                              |
-| **`headers`**                | <code>{ [key: string]: any; }</code>                              |
-| **`android`**                | <code><a href="#androidparams">AndroidParams</a></code>           |
-| **`ios`**                    | <code><a href="#iosparams">IOSParams</a></code>                   |
+| Prop                                  | Type                                                              |
+| ------------------------------------- | ----------------------------------------------------------------- |
+| **`id`**                              | <code>string</code>                                               |
+| **`nameCaller`**                      | <code>string</code>                                               |
+| **`appName`**                         | <code>string</code>                                               |
+| **`avatar`**                          | <code>string</code>                                               |
+| **`handle`**                          | <code>string</code>                                               |
+| **`type`**                            | <code>number</code>                                               |
+| **`normalHandle`**                    | <code>number</code>                                               |
+| **`duration`**                        | <code>number</code>                                               |
+| **`textAccept`**                      | <code>string</code>                                               |
+| **`textDecline`**                     | <code>string</code>                                               |
+| **`textMissedCall`**                  | <code>string</code>                                               |
+| **`textCallback`**                    | <code>string</code>                                               |
+| **`rationaleMessagePermission`**      | <code>string</code>                                               |
+| **`postNotificationMessageRequired`** | <code>string</code>                                               |
+| **`missedCallNotification`**          | <code><a href="#notificationparams">NotificationParams</a></code> |
+| **`extra`**                           | <code>{ [key: string]: any; }</code>                              |
+| **`headers`**                         | <code>{ [key: string]: any; }</code>                              |
+| **`android`**                         | <code><a href="#androidparams">AndroidParams</a></code>           |
+| **`ios`**                             | <code><a href="#iosparams">IOSParams</a></code>                   |
 
 
 #### NotificationParams
