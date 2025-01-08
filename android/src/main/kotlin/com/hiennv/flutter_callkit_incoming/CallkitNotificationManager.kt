@@ -182,8 +182,10 @@ class CallkitNotificationManager(private val context: Context) {
             if (avatarUrl != null && avatarUrl.isNotEmpty()) {
                 val headers =
                     data.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
-                getPicassoInstance(context, headers).load(avatarUrl)
-                    .into(targetLoadAvatarDefault)
+                Handler(Looper.getMainLooper()).post {
+                    getPicassoInstance(context, headers).load(avatarUrl)
+                        .into(targetLoadAvatarDefault)
+                }
             }
             val caller = data.getString(CallkitConstants.EXTRA_CALLKIT_NAME_CALLER, "")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
@@ -259,9 +261,11 @@ class CallkitNotificationManager(private val context: Context) {
         if (avatarUrl != null && avatarUrl.isNotEmpty()) {
             val headers =
                 data.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
-            getPicassoInstance(context, headers).load(avatarUrl)
-                .transform(CircleTransform())
-                .into(targetLoadAvatarCustomize)
+            Handler(Looper.getMainLooper()).post {
+                getPicassoInstance(context, headers).load(avatarUrl)
+                    .transform(CircleTransform())
+                    .into(targetLoadAvatarCustomize)
+            }
         }
     }
 
@@ -346,8 +350,10 @@ class CallkitNotificationManager(private val context: Context) {
                 val headers =
                     data.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
 
-                getPicassoInstance(context, headers).load(avatarUrl)
-                    .transform(CircleTransform()).into(targetLoadAvatarCustomize)
+                Handler(Looper.getMainLooper()).post {
+                    getPicassoInstance(context, headers).load(avatarUrl)
+                        .transform(CircleTransform()).into(targetLoadAvatarCustomize)
+                }
             }
             notificationBuilder.setStyle(NotificationCompat.DecoratedCustomViewStyle())
             notificationBuilder.setCustomContentView(notificationViews)
@@ -370,8 +376,10 @@ class CallkitNotificationManager(private val context: Context) {
                 val headers =
                     data.getSerializable(CallkitConstants.EXTRA_CALLKIT_HEADERS) as HashMap<String, Any?>
 
-                getPicassoInstance(context, headers).load(avatarUrl)
-                    .into(targetLoadAvatarDefault)
+                Handler(Looper.getMainLooper()).post {
+                    getPicassoInstance(context, headers).load(avatarUrl)
+                        .into(targetLoadAvatarDefault)
+                }
             }
             val isShowCallback = data.getBoolean(
                 CallkitConstants.EXTRA_CALLKIT_MISSED_CALL_CALLBACK_SHOW,
@@ -572,7 +580,7 @@ class CallkitNotificationManager(private val context: Context) {
 
     fun requestFullIntentPermission(activity: Activity?) {
         if (Build.VERSION.SDK_INT > 33) {
-           val intent = Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
+            val intent = Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
                 data =  Uri.fromParts("package", activity?.packageName, null)
             }
             activity?.startActivity(intent)
@@ -662,8 +670,4 @@ class CallkitNotificationManager(private val context: Context) {
                 .show()
         }
     }
-
-
 }
-
-

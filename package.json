@@ -1,6 +1,6 @@
 {
   "name": "capacitor-incoming-call-kit",
-  "version": "0.0.8",
+  "version": "0.1.6",
   "description": "A Capacitor plugin to show incoming call in your Capacitor app(Custom for Android/Callkit for iOS)",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",
@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.2.0",
     "@capacitor/core": "^6.0.0",
     "@capacitor/docgen": "^0.2.2",
     "@capacitor/ios": "^6.0.0",

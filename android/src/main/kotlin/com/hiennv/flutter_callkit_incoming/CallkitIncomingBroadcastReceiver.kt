@@ -7,6 +7,14 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.Response
+import java.io.IOException
 
 class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
 
@@ -75,6 +83,31 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
             }
     }
 
+    @Throws(IOException::class)
+    fun postRequest(url: String, json: String?) {
+        val client = OkHttpClient()
+        val body: RequestBody = RequestBody.create(MediaType.parse("application/json"), json ?: "{}")
+        val request: Request = Request.Builder()
+            .url(url)
+            .post(body)
+            .build()
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                Log.e(TAG, "postRequest failed with error: $e")
+            }
+
+            @Throws(IOException::class)
+            override fun onResponse(call: Call, response: Response) {
+                if (response.isSuccessful) {
+                    val responseStr: String = response.body()?.string() ?: ""
+                    Log.i(TAG, "postRequest successful with response: $responseStr")
+                } else {
+                    Log.i(TAG, "postRequest was NOT successful")
+                }
+            }
+        })
+    }
+
 
     @SuppressLint("MissingPermission")
     override fun onReceive(context: Context, intent: Intent) {
@@ -92,6 +125,16 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                                 Intent(context, CallkitSoundPlayerService::class.java)
                         soundPlayerServiceIntent.putExtras(data)
                         context.startService(soundPlayerServiceIntent)
+                    }
+                    val extras =
+                        data.getSerializable(CallkitConstants.EXTRA_CALLKIT_EXTRA) as HashMap<*, *>
+                    var url = extras["callResponseUrl"] as String?
+                    val incomingBody = extras["incomingBody"] as String?
+                    val sessionToken = extras["sessionToken"] as String?
+                    Log.i(TAG, "ACTION_CALL_INCOMING EXTRAS url: ${url}, body: ${incomingBody}, token: $sessionToken")
+                    if (url != null) {
+                        if (sessionToken != null) url = "${url}?sessionToken=${sessionToken}"
+                        postRequest(url, incomingBody)
                     }
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
@@ -124,6 +167,16 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                     context.stopService(Intent(context, CallkitSoundPlayerService::class.java))
                     callkitNotificationManager.clearIncomingNotification(data, false)
                     removeCall(context, Data.fromBundle(data))
+                    val extras =
+                        data.getSerializable(CallkitConstants.EXTRA_CALLKIT_EXTRA) as HashMap<*, *>
+                    var url = extras["callResponseUrl"] as String?
+                    val declineBody = extras["declineBody"] as String?
+                    val sessionToken = extras["sessionToken"] as String?
+                    Log.i(TAG, "ACTION_CALL_DECLINE EXTRAS url: ${url}, body: ${declineBody}, token: $sessionToken")
+                    if (url != null) {
+                        if (sessionToken != null) url = "${url}?sessionToken=${sessionToken}"
+                        postRequest(url, declineBody)
+                    }
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
                 }

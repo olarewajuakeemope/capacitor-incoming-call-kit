@@ -15,6 +15,7 @@
             android:name="com.hiennv.flutter_callkit_incoming.CallkitIncomingActivity"
             android:taskAffinity="com.hiennv.flutter_callkit_incoming.INCOMING_CALL_AFFINITY"
             android:excludeFromRecents="true"
+            android:directBootAware="true"
             android:noHistory="true"
             android:turnScreenOn="true"
             android:configChanges="orientation"
@@ -27,13 +28,15 @@
         </activity>
         <activity
             android:exported="false"
+            android:directBootAware="true"
             android:theme="@style/TranslucentTheme"
             android:name="com.hiennv.flutter_callkit_incoming.TransparentActivity"/>
 
         <receiver
             android:name="com.hiennv.flutter_callkit_incoming.CallkitIncomingBroadcastReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:directBootAware="true">
             <intent-filter>
                 <action android:name="${applicationId}.com.hiennv.flutter_callkit_incoming.ACTION_CALL_INCOMING" />
                 <action android:name="${applicationId}.com.hiennv.flutter_callkit_incoming.ACTION_CALL_ACCEPT" />
@@ -46,7 +49,18 @@
         <service
             android:enabled="true"
             android:exported="true"
-            android:name="com.hiennv.flutter_callkit_incoming.CallkitSoundPlayerService"/>
+            android:directBootAware="true"
+            android:name="com.hiennv.flutter_callkit_incoming.CallkitSoundPlayerService"
+            />
+        <service
+            android:exported="false"
+            android:directBootAware="true"
+            android:name="com.hiennv.flutter_callkit_incoming.MessagingService"
+            >
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
     </application>
 </manifest>

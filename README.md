@@ -4,6 +4,8 @@ A Capacitor plugin to show incoming call in your Capacitor app(Custom for Androi
 
 This plugin is a modification of the Flutter plugin: flutter_callkit_incoming to suite a capacitor app so all credits goes to hiennguyen92
 
+The plugin is has @capacitor/push-notifications version 6.0.1 integrated
+
 ## Install
 
 ```bash
@@ -120,13 +122,6 @@ onMethod(options: { options: string; methodName: MethodNames; parsedOptions: Cal
 | **`ringtonePath`**                          | <code>string</code>  |
 
 
-#### PluginListenerHandle
-
-| Prop         | Type                                      |
-| ------------ | ----------------------------------------- |
-| **`remove`** | <code>() =&gt; Promise&lt;void&gt;</code> |
-
-
 ### Type Aliases
 
 
@@ -137,11 +132,6 @@ onMethod(options: { options: string; methodName: MethodNames; parsedOptions: Cal
 
 #### MethodNames
 
-<code>'showCallkitIncoming' | 'showCallkitIncomingSilently' | 'showMissCallNotification' | 'startCall' | 'muteCall' | 'holdCall' | 'isMuted' | 'endCall' | 'callConnected' | 'endAllCalls' | 'activeCalls' | 'getDevicePushTokenVoIP' | 'silenceEvents' | 'requestNotificationPermission' | 'requestFullIntentPermission' | 'hideCallkitIncoming' | 'endNativeSubsystemOnly' | 'setAudioRoute'</code>
-
-
-#### Events
-
-<code>'com.hiennv.flutter_callkit_incoming.DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_INCOMING' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_START' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_ACCEPT' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_DECLINE' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_ENDED' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_TIMEOUT' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_CALLBACK' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_TOGGLE_HOLD' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_TOGGLE_MUTE' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_TOGGLE_DMTF' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_TOGGLE_GROUP' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_TOGGLE_AUDIO_SESSION' | 'com.hiennv.flutter_callkit_incoming.ACTION_CALL_CUSTOM'</code>
+<code>'showCallkitIncoming' | 'sendPendingAcceptEvent' | 'showCallkitIncomingSilently' | 'showMissCallNotification' | 'startCall' | 'muteCall' | 'holdCall' | 'isMuted' | 'endCall' | 'callConnected' | 'endAllCalls' | 'activeCalls' | 'getDevicePushTokenVoIP' | 'silenceEvents' | 'requestNotificationPermission' | 'requestFullIntentPermission' | 'hideCallkitIncoming' | 'endNativeSubsystemOnly' | 'setAudioRoute'</code>
 
 </docgen-api>
