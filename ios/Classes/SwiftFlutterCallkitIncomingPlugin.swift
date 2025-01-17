@@ -66,15 +66,45 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
     private var data: Data?
     private var isFromPushKit: Bool = false
     private var silenceEvents: Bool = false
+    private var lastAcceptCallEvent: [String : Any]?
+    private var lastIncomingCallEvent: [String : Any]?
     private let devicePushTokenVoIP = "DevicePushTokenVoIP"
+    
+    private func postRequest(_ url: String, _ json: String?) {
+        if (SwiftFlutterCallkitIncomingPlugin.sharedInstance == nil) {
+            Task {
+                do {
+    //                NSLog("postRequest with url: \(String(describing: url)) and json: \(String(describing: json))")
+                    var request = URLRequest(url: URL(string: url)!)
+                    request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
 
+                    // Use the async variant of URLSession to make an HTTP POST request:
+                    request.httpMethod = "POST"
+                    let (_, _) = try await URLSession.shared.upload(for: request, from: json?.data(using: .utf8) ?? Foundation.Data())
+    //                NSLog("postRequest successful with response: \(String(describing: response)) and data: \(String(decoding: data, as: UTF8.self))")
+                } catch {
+                    NSLog("postRequest attempt with error \(String(describing: error))")
+                }
+            }
+        } else {
+            NSLog("postRequest ignored for \(String(describing: url)) as app is active")
+        }
+    }
     
     private func sendEvent(_ event: String, _ body: [String : Any]?) {
         if silenceEvents {
             print(event, " silenced")
             return
         } else {
-            self.notifyListeners(event, data: body ?? [:])
+            if (SwiftFlutterCallkitIncomingPlugin.sharedInstance != nil) {
+                self.notifyListeners(event, data: body ?? [:])
+            } else {
+                if (event == SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ACCEPT) {
+                    lastAcceptCallEvent = body
+                } else if (event == SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_INCOMING) {
+                    lastIncomingCallEvent = body
+                }
+            }
         }
         
     }
@@ -247,7 +277,7 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
 
     @objc public func didRegisterForRemoteNotificationsWithDeviceToken(notification: NSNotification) {
         appDelegateRegistrationCalled = true
-        if let deviceToken = notification.object as? Data {
+        if let deviceToken = notification.object as? Foundation.Data {
             let deviceTokenString = deviceToken.reduce("", {$0 + String(format: "%02X", $1)})
             notifyListeners("registration", data: [
                 "value": deviceTokenString
@@ -277,6 +307,10 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
         let name = pluginCall.getString("methodName") ?? ""
         let options = pluginCall.getObject("parsedOptions")
         switch name {
+        case "sendPendingAcceptEvent":
+            sendPendingAcceptEvent()
+            pluginCall.resolve()
+            break
         case "showCallkitIncoming":
             guard let getArgs = options else {
                 pluginCall.resolve()
@@ -420,6 +454,17 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
         return nil
     }
     
+    @objc public func sendPendingAcceptEvent() {
+        if (lastIncomingCallEvent != nil) {
+            sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_INCOMING, lastIncomingCallEvent)
+            lastIncomingCallEvent = nil
+        }
+        if (lastAcceptCallEvent != nil) {
+            sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ACCEPT, lastAcceptCallEvent)
+            lastAcceptCallEvent = nil
+        }
+    }
+    
     @objc public func showCallkitIncoming(_ data: Data, fromPushKit: Bool) {
         self.isFromPushKit = fromPushKit
         if(fromPushKit){
@@ -451,6 +496,16 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
                 self.callManager.addCall(call)
                 self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_INCOMING, data.toJSON())
                 self.endCallNotExist(data)
+                var url = data.extra["callResponseUrl"] as? String
+                let incomingBody = data.extra["incomingBody"] as? String
+                let sessionToken = data.extra["sessionToken"] as? String
+                NSLog("ACTION_CALL_INCOMING url: \(String(describing: url)), incomingBody: \(String(describing: incomingBody)), sessionToken: \(String(describing: sessionToken))")
+                if (url != nil) {
+                    if (sessionToken != nil) {
+                        url = url! + "?sessionToken=" + sessionToken!
+                    }
+                    self.postRequest(url!, incomingBody)
+                }
             }
         }
     }
@@ -742,6 +797,16 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
                 appDelegate.onDecline(call, action)
             } else {
                 action.fulfill()
+            }
+            var url = self.data?.extra["callResponseUrl"] as? String
+            let declineBody = self.data?.extra["declineBody"] as? String
+            let sessionToken = self.data?.extra["sessionToken"] as? String
+            NSLog("ACTION_CALL_DECLINE url: \(String(describing: url)), declineBody: \(String(describing: declineBody)), sessionToken: \(String(describing: sessionToken))")
+            if (url != nil) {
+                if (sessionToken != nil) {
+                    url = url! + "?sessionToken=" + sessionToken!
+                }
+                self.postRequest(url!, declineBody)
             }
         }else {
             sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ENDED, call.data.toJSON())

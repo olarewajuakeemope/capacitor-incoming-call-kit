@@ -85,6 +85,7 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
 
     @Throws(IOException::class)
     fun postRequest(url: String, json: String?) {
+        if (FlutterCallkitIncomingPlugin.pushNotificationsInstance == null) {
         val client = OkHttpClient()
         val body: RequestBody = RequestBody.create(MediaType.parse("application/json"), json ?: "{}")
         val request: Request = Request.Builder()
@@ -106,6 +107,9 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
                 }
             }
         })
+        } else {
+                    Log.i(TAG, "postRequest ignored for $url as app is active")
+        }
     }
 
 
