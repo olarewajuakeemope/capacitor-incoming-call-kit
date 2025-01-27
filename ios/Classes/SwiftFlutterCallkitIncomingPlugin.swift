@@ -66,6 +66,7 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
     private var data: Data?
     private var isFromPushKit: Bool = false
     private var silenceEvents: Bool = false
+    private var lastEndCallEvent: [String : Any]?
     private var lastAcceptCallEvent: [String : Any]?
     private var lastIncomingCallEvent: [String : Any]?
     private let devicePushTokenVoIP = "DevicePushTokenVoIP"
@@ -102,6 +103,8 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
                     lastAcceptCallEvent = body
                 } else if (event == SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_INCOMING) {
                     lastIncomingCallEvent = body
+                } else if (event == SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ENDED) {
+                    lastEndCallEvent = body
                 }
             }
         }
@@ -472,6 +475,10 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
         if (lastAcceptCallEvent != nil) {
             sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ACCEPT, lastAcceptCallEvent)
             lastAcceptCallEvent = nil
+        }
+        if (lastEndCallEvent != nil) {
+            sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ENDED, lastEndCallEvent)
+            lastEndCallEvent = nil
         }
     }
     

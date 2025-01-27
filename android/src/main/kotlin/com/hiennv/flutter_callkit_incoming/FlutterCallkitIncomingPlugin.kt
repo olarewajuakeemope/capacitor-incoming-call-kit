@@ -63,6 +63,7 @@ class FlutterCallkitIncomingPlugin : Plugin() {
 
         var staticBridge: Bridge? = null
         var lastMessage: RemoteMessage? = null
+        var lastEndCallEvent: Map<String, Map<String, Any>>? = null
         var lastAcceptCallEvent: Map<String, Map<String, Any>>? = null
         var lastIncomingCallEvent: Map<String, Map<String, Any>>? = null
         private const val EVENT_TOKEN_CHANGE = "registration"
@@ -131,6 +132,7 @@ class FlutterCallkitIncomingPlugin : Plugin() {
             } else {
                 if (event == CallkitConstants.ACTION_CALL_ACCEPT) lastAcceptCallEvent = buildMap { put(event, mapBody) }
                 else if (event == CallkitConstants.ACTION_CALL_INCOMING) lastIncomingCallEvent = buildMap { put(event, mapBody) }
+                else if (event == CallkitConstants.ACTION_CALL_ENDED) lastEndCallEvent = buildMap { put(event, mapBody) }
             }
         }
 
@@ -553,6 +555,12 @@ class FlutterCallkitIncomingPlugin : Plugin() {
                 sendEvent(key, value)
             }
             lastAcceptCallEvent = null
+        }
+        if (lastEndCallEvent != null) {
+            for ((key, value) in lastEndCallEvent!!) {
+                sendEvent(key, value)
+            }
+            lastEndCallEvent = null
         }
     }
 
