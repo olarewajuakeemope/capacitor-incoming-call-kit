@@ -70,7 +70,7 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
     private var lastIncomingCallEvent: [String : Any]?
     private let devicePushTokenVoIP = "DevicePushTokenVoIP"
     private func postRequest(_ url: String, _ json: String?) {
-        if (self.bridge == nil) {
+        // if (self.bridge == nil) {
             Task {
                 do {
     //                NSLog("postRequest with url: \(String(describing: url)) and json: \(String(describing: json))")
@@ -85,9 +85,9 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
                     NSLog("postRequest attempt with error \(String(describing: error))")
                 }
             }
-        } else {
-            NSLog("postRequest ignored for \(String(describing: url)) as app is active")
-        }
+        // } else {
+        //     NSLog("postRequest ignored for \(String(describing: url)) as app is active")
+        // }
     }
     
     public func sendEvent(_ event: String, _ body: [String : Any]?) {

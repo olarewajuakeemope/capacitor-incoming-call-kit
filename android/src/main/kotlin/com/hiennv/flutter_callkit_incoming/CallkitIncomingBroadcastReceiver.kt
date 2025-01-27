@@ -85,31 +85,31 @@ class CallkitIncomingBroadcastReceiver : BroadcastReceiver() {
 
     @Throws(IOException::class)
     fun postRequest(url: String, json: String?) {
-        if (FlutterCallkitIncomingPlugin.pushNotificationsInstance == null) {
-        val client = OkHttpClient()
-        val body: RequestBody = RequestBody.create(MediaType.parse("application/json"), json ?: "{}")
-        val request: Request = Request.Builder()
-            .url(url)
-            .post(body)
-            .build()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Log.e(TAG, "postRequest failed with error: $e")
-            }
-
-            @Throws(IOException::class)
-            override fun onResponse(call: Call, response: Response) {
-                if (response.isSuccessful) {
-                    val responseStr: String = response.body()?.string() ?: ""
-                    Log.i(TAG, "postRequest successful with response: $responseStr")
-                } else {
-                    Log.i(TAG, "postRequest was NOT successful")
+        // if (FlutterCallkitIncomingPlugin.pushNotificationsInstance == null) {
+            val client = OkHttpClient()
+            val body: RequestBody = RequestBody.create(MediaType.parse("application/json"), json ?: "{}")
+            val request: Request = Request.Builder()
+                .url(url)
+                .post(body)
+                .build()
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Log.e(TAG, "postRequest failed with error: $e")
                 }
-            }
-        })
-        } else {
-                    Log.i(TAG, "postRequest ignored for $url as app is active")
-        }
+
+                @Throws(IOException::class)
+                override fun onResponse(call: Call, response: Response) {
+                    if (response.isSuccessful) {
+                        val responseStr: String = response.body()?.string() ?: ""
+                        Log.i(TAG, "postRequest successful with response: $responseStr")
+                    } else {
+                        Log.i(TAG, "postRequest was NOT successful")
+                    }
+                }
+            })
+        // } else {
+        //             Log.i(TAG, "postRequest ignored for $url as app is active")
+        // }
     }
 
 
