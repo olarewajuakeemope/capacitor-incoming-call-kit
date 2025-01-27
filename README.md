@@ -54,6 +54,7 @@ onMethod(options: { options: string; methodName: MethodNames; parsedOptions: Cal
 | **`avatar`**                          | <code>string</code>                                               |
 | **`handle`**                          | <code>string</code>                                               |
 | **`type`**                            | <code>number</code>                                               |
+| **`isOnHold`**                        | <code>boolean</code>                                              |
 | **`normalHandle`**                    | <code>number</code>                                               |
 | **`duration`**                        | <code>number</code>                                               |
 | **`textAccept`**                      | <code>string</code>                                               |
@@ -127,11 +128,11 @@ onMethod(options: { options: string; methodName: MethodNames; parsedOptions: Cal
 
 #### Responses
 
-<code>void | { isMuted: boolean } | { calls: CallKitParams[] } | { devicePushTokenVoIP: string }</code>
+<code>void | { isMuted: boolean } | { calls: CallKitParams[] } | { isVersionOk: boolean } | { devicePushTokenVoIP: string }</code>
 
 
 #### MethodNames
 
-<code>'showCallkitIncoming' | 'sendPendingAcceptEvent' | 'showCallkitIncomingSilently' | 'showMissCallNotification' | 'startCall' | 'muteCall' | 'holdCall' | 'isMuted' | 'endCall' | 'callConnected' | 'endAllCalls' | 'activeCalls' | 'getDevicePushTokenVoIP' | 'silenceEvents' | 'requestNotificationPermission' | 'requestFullIntentPermission' | 'hideCallkitIncoming' | 'endNativeSubsystemOnly' | 'setAudioRoute'</code>
+<code>'showCallkitIncoming' | 'checkIsVersionOk' | 'sendPendingAcceptEvent' | 'showCallkitIncomingSilently' | 'showMissCallNotification' | 'startCall' | 'muteCall' | 'holdCall' | 'isMuted' | 'endCall' | 'callConnected' | 'endAllCalls' | 'activeCalls' | 'getDevicePushTokenVoIP' | 'silenceEvents' | 'requestNotificationPermission' | 'requestFullIntentPermission' | 'hideCallkitIncoming' | 'endNativeSubsystemOnly' | 'setAudioRoute'</code>
 
 </docgen-api>

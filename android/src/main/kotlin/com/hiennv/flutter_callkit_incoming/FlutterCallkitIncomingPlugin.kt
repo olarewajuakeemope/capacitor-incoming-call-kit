@@ -568,6 +568,12 @@ class FlutterCallkitIncomingPlugin : Plugin() {
                     call.resolve()
                 }
 
+                "checkIsVersionOk" -> {
+                    val jsObject = JSObject()
+                    jsObject.put("isVersionOk", true)
+                     call.resolve(jsObject)
+                }
+
                 "showCallkitIncoming" -> {
                     val data = Data(options ?: HashMap())
                     data.from = "notification"

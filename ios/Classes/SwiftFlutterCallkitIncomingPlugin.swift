@@ -41,11 +41,11 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
     static let ACTION_DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP = "com.hiennv.flutter_callkit_incoming.DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP"
     
     static let ACTION_CALL_INCOMING = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_INCOMING"
-    static let ACTION_CALL_START = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_START"
-    static let ACTION_CALL_ACCEPT = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ACCEPT"
+    public static let ACTION_CALL_START = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_START"
+    public static let ACTION_CALL_ACCEPT = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ACCEPT"
     static let ACTION_CALL_DECLINE = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_DECLINE"
     static let ACTION_CALL_ENDED = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_ENDED"
-    static let ACTION_CALL_TIMEOUT = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_TIMEOUT"
+    public static let ACTION_CALL_TIMEOUT = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_TIMEOUT"
     static let ACTION_CALL_CUSTOM = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_CUSTOM"
     
     static let ACTION_CALL_TOGGLE_HOLD = "com.hiennv.flutter_callkit_incoming.ACTION_CALL_TOGGLE_HOLD"
@@ -69,9 +69,8 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
     private var lastAcceptCallEvent: [String : Any]?
     private var lastIncomingCallEvent: [String : Any]?
     private let devicePushTokenVoIP = "DevicePushTokenVoIP"
-    
     private func postRequest(_ url: String, _ json: String?) {
-        if (SwiftFlutterCallkitIncomingPlugin.sharedInstance == nil) {
+        if (self.bridge == nil) {
             Task {
                 do {
     //                NSLog("postRequest with url: \(String(describing: url)) and json: \(String(describing: json))")
@@ -91,12 +90,12 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
         }
     }
     
-    private func sendEvent(_ event: String, _ body: [String : Any]?) {
+    public func sendEvent(_ event: String, _ body: [String : Any]?) {
         if silenceEvents {
             print(event, " silenced")
             return
         } else {
-            if (SwiftFlutterCallkitIncomingPlugin.sharedInstance != nil) {
+            if (self.bridge != nil) {
                 self.notifyListeners(event, data: body ?? [:])
             } else {
                 if (event == SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ACCEPT) {
@@ -307,6 +306,9 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
         let name = pluginCall.getString("methodName") ?? ""
         let options = pluginCall.getObject("parsedOptions")
         switch name {
+        case "checkIsVersionOk":
+            checkIsVersionOk(pluginCall)
+            break
         case "sendPendingAcceptEvent":
             sendPendingAcceptEvent()
             pluginCall.resolve()
@@ -417,10 +419,10 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
             self.silenceEvents = silence
             pluginCall.resolve()
             break;
-        case "requestNotificationPermission": 
+        case "requestNotificationPermission":
             pluginCall.resolve()
             break
-         case "requestFullIntentPermission": 
+         case "requestFullIntentPermission":
             pluginCall.resolve()
             break
         case "hideCallkitIncoming":
@@ -454,6 +456,14 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
         return nil
     }
     
+    @objc public func checkIsVersionOk(_ pluginCall: CAPPluginCall) {
+        var body = [ "isVersionOk": false ]
+        if #available(iOS 14.0, *) {
+            body["isVersionOk"] = true
+        }
+        pluginCall.resolve(body)
+    }
+    
     @objc public func sendPendingAcceptEvent() {
         if (lastIncomingCallEvent != nil) {
             sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_INCOMING, lastIncomingCallEvent)
@@ -470,41 +480,22 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
         if(fromPushKit){
             self.data = data
         }
-        
-        var handle: CXHandle?
-        handle = CXHandle(type: self.getHandleType(data.handleType), value: data.getEncryptHandle())
-        
-        let callUpdate = CXCallUpdate()
-        callUpdate.remoteHandle = handle
-        callUpdate.supportsDTMF = data.supportsDTMF
-        callUpdate.supportsHolding = data.supportsHolding
-        callUpdate.supportsGrouping = data.supportsGrouping
-        callUpdate.supportsUngrouping = data.supportsUngrouping
-        callUpdate.hasVideo = data.type > 0 ? true : false
-        callUpdate.localizedCallerName = data.nameCaller
-        
-        initCallkitProvider(data)
-        
-        let uuid = UUID(uuidString: data.uuid)
-        
-        configurAudioSession()
-        self.sharedProvider?.reportNewIncomingCall(with: uuid!, update: callUpdate) { error in
-            if(error == nil) {
-                self.configurAudioSession()
-                let call = Call(uuid: uuid!, data: data)
-                call.handle = data.handle
-                self.callManager.addCall(call)
-                self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_INCOMING, data.toJSON())
-                self.endCallNotExist(data)
-                var url = data.extra["callResponseUrl"] as? String
-                let incomingBody = data.extra["incomingBody"] as? String
-                let sessionToken = data.extra["sessionToken"] as? String
-                NSLog("ACTION_CALL_INCOMING url: \(String(describing: url)), incomingBody: \(String(describing: incomingBody)), sessionToken: \(String(describing: sessionToken))")
-                if (url != nil) {
-                    if (sessionToken != nil) {
-                        url = url! + "?sessionToken=" + sessionToken!
+        if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
+            var remoteHandle: CXHandle?
+            remoteHandle = CXHandle(type: self.getHandleType(data.handleType), value: data.getEncryptHandle())
+            appDelegate.reportIncomingCall(data, remoteHandle!) { error in
+                if(error == nil) {
+                    self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_INCOMING, data.toJSON())
+                    var url = data.extra["callResponseUrl"] as? String
+                    let incomingBody = data.extra["incomingBody"] as? String
+                    let sessionToken = data.extra["sessionToken"] as? String
+                    NSLog("ACTION_CALL_INCOMING url: \(String(describing: url)), incomingBody: \(String(describing: incomingBody)), sessionToken: \(String(describing: sessionToken))")
+                    if (url != nil) {
+                        if (sessionToken != nil) {
+                            url = url! + "?sessionToken=" + sessionToken!
+                        }
+                        self.postRequest(url!, incomingBody)
                     }
-                    self.postRequest(url!, incomingBody)
                 }
             }
         }
@@ -515,8 +506,11 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
         if(fromPushKit){
             self.data = data
         }
-        initCallkitProvider(data)
-        self.callManager.startCall(data)
+        DispatchQueue.main.async {
+            if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
+                appDelegate.onStartCall(data)
+            }
+        }
     }
     
     @objc public func muteCall(_ callId: String, isMuted: Bool) {
@@ -532,38 +526,32 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
     }
     
     @objc public func holdCall(_ callId: String, onHold: Bool) {
-        guard let callId = UUID(uuidString: callId),
-              let call = self.callManager.callWithUUID(uuid: callId) else {
-            return
-        }
-        if call.isOnHold == onHold {
-            self.sendMuteEvent(callId.uuidString,  onHold)
-        } else {
-            self.callManager.holdCall(call: call, onHold: onHold)
+        if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
+            appDelegate.onHoldCall(callId, onHold)
         }
     }
     
     @objc public func endCall(_ data: Data) {
-        var call: Call? = nil
         if(self.isFromPushKit){
-            call = Call(uuid: UUID(uuidString: self.data!.uuid)!, data: data)
             self.isFromPushKit = false
             self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ENDED, data.toJSON())
-        }else {
-            call = Call(uuid: UUID(uuidString: data.uuid)!, data: data)
         }
-        self.callManager.endCall(call: call!)
+        DispatchQueue.main.async {
+            if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
+                appDelegate.onEndCall(data)
+            }
+        }
     }
     
     @objc public func connectedCall(_ data: Data) {
-        var call: Call? = nil
         if(self.isFromPushKit){
-            call = Call(uuid: UUID(uuidString: self.data!.uuid)!, data: data)
             self.isFromPushKit = false
-        }else {
-            call = Call(uuid: UUID(uuidString: data.uuid)!, data: data)
         }
-        self.callManager.connectedCall(call: call!)
+        DispatchQueue.main.async {
+            if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
+                appDelegate.onConnectCall(data)
+            }
+        }
     }
     
     @objc public func activeCalls() -> [[String: Any]] {
@@ -777,45 +765,55 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
             action.fulfill()
         }
     }
+
+    public func onEndCall(hasCall: Bool, hasOutgoingCall: Bool, hasAnswerCall: Bool, data: Data?) {
+        if (hasCall == false) {
+            if(hasAnswerCall == false && hasOutgoingCall == false){
+                sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TIMEOUT, data?.toJSON())
+            } else {
+                sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ENDED, data?.toJSON())
+            }
+            return
+        }
+        if (hasAnswerCall == false && hasOutgoingCall == false) {
+            sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_DECLINE, data?.toJSON())
+            var url = data?.extra["callResponseUrl"] as? String
+            let declineBody = data?.extra["declineBody"] as? String
+            let sessionToken = data?.extra["sessionToken"] as? String
+            if (url != nil) {
+                if (sessionToken != nil) {
+                    url = url! + "?sessionToken=" + sessionToken!
+                }
+                postRequest(url!, declineBody)
+            }
+        }else {
+            sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ENDED, data?.toJSON())
+        }
+    }
     
     
     public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
         guard let call = self.callManager.callWithUUID(uuid: action.callUUID) else {
-            if(self.answerCall == nil && self.outgoingCall == nil){
-                sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TIMEOUT, self.data?.toJSON())
-            } else {
-                sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ENDED, self.data?.toJSON())
-            }
+            self.onEndCall(hasCall: false, hasOutgoingCall: self.outgoingCall != nil, hasAnswerCall: self.answerCall != nil, data: self.data)
             action.fail()
             return
         }
         call.endCall()
         self.callManager.removeCall(call)
         if (self.answerCall == nil && self.outgoingCall == nil) {
-            sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_DECLINE, self.data?.toJSON())
             if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
                 appDelegate.onDecline(call, action)
             } else {
                 action.fulfill()
             }
-            var url = self.data?.extra["callResponseUrl"] as? String
-            let declineBody = self.data?.extra["declineBody"] as? String
-            let sessionToken = self.data?.extra["sessionToken"] as? String
-            NSLog("ACTION_CALL_DECLINE url: \(String(describing: url)), declineBody: \(String(describing: declineBody)), sessionToken: \(String(describing: sessionToken))")
-            if (url != nil) {
-                if (sessionToken != nil) {
-                    url = url! + "?sessionToken=" + sessionToken!
-                }
-                self.postRequest(url!, declineBody)
-            }
-        }else {
-            sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_ENDED, call.data.toJSON())
+        } else {
             if let appDelegate = UIApplication.shared.delegate as? CallkitIncomingAppDelegate {
                 appDelegate.onEnd(call, action)
             } else {
                 action.fulfill()
             }
         }
+        self.onEndCall(hasCall: true, hasOutgoingCall: self.outgoingCall != nil, hasAnswerCall: self.answerCall != nil, data: self.data)
     }
     
     
@@ -926,11 +924,11 @@ public class SwiftFlutterCallkitIncomingPlugin: CAPPlugin, CAPBridgedPlugin, CXP
         self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TOGGLE_AUDIO_SESSION, [ "isActivate": false ])
     }
     
-    private func sendMuteEvent(_ id: String, _ isMuted: Bool) {
+    public func sendMuteEvent(_ id: String, _ isMuted: Bool) {
         self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TOGGLE_MUTE, [ "id": id, "isMuted": isMuted ])
     }
     
-    private func sendHoldEvent(_ id: String, _ isOnHold: Bool) {
+    public func sendHoldEvent(_ id: String, _ isOnHold: Bool) {
         self.sendEvent(SwiftFlutterCallkitIncomingPlugin.ACTION_CALL_TOGGLE_HOLD, [ "id": id, "isOnHold": isOnHold ])
     }
     

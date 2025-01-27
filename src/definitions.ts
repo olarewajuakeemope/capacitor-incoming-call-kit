@@ -415,6 +415,7 @@ export declare type PushNotificationToken = Token;
 
 export type MethodNames =  |
   'showCallkitIncoming' |
+  'checkIsVersionOk' |
   'sendPendingAcceptEvent' |
   'showCallkitIncomingSilently' |
   'showMissCallNotification' |
@@ -552,6 +553,7 @@ export interface CallKitParams {
   avatar?: string
   handle?: string
   type?: number
+  isOnHold?: boolean
   normalHandle?: number
   duration?: number
   textAccept?: string
@@ -567,7 +569,7 @@ export interface CallKitParams {
   ios?: IOSParams,
 }
 
-export type Responses = void | { isMuted: boolean } | { calls: CallKitParams[] } | { devicePushTokenVoIP: string }
+export type Responses = void | { isMuted: boolean } | { calls: CallKitParams[] } | { isVersionOk: boolean } | { devicePushTokenVoIP: string }
 
 export interface FlutterCallkitIncomingPlugin extends PushNotificationsPlugin {
   onMethod(options: {
